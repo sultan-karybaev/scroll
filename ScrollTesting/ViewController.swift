@@ -13,6 +13,8 @@ class ViewController: UIViewController {
     @IBOutlet weak var container: UIView!
     @IBOutlet weak var scroll: UIScrollView!
     var views: [String: UIView] = [:]
+    var currentViewController: UIViewController?
+    var sc: ScrollController!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -34,6 +36,7 @@ class ViewController: UIViewController {
         guard let conController = childViewControllers.first as? conController else  {
             fatalError("Check storyboard for missing LocationTableViewController")
         }
+        conController.delegate = self
         
         print(conController.views)
         
@@ -56,13 +59,56 @@ class ViewController: UIViewController {
         
 //        scroll.contentSize = CGSize(width: view.bounds.width, height: view.bounds.height - 120)
         
+        
+        
+        self.currentViewController = self.storyboard!.instantiateViewController(withIdentifier: "conController")
+        let cc = self.currentViewController as? conController
+        cc?.delegate = self
+        self.currentViewController!.view.translatesAutoresizingMaskIntoConstraints = false
+        self.addChildViewController(self.currentViewController!)
+        self.addSubview(subView: self.currentViewController!.view, toView: self.container)
+        
     }
     
-    func back(for unwindSegue: UIStoryboardSegue) {
-        
+    func addSubview(subView: UIView, toView parentView: UIView) {
+        parentView.addSubview(subView)
+
+        var viewBindingsDict = [String: AnyObject]()
+        viewBindingsDict["subView"] = subView
+        parentView.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "H:|[subView]|",
+                                                                                 options: [], metrics: nil, views: viewBindingsDict))
+        parentView.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "V:|[subView]|",
+                                                                                 options: [], metrics: nil, views: viewBindingsDict))
+    }
+    
+    func cycleFromViewController(oldViewController: UIViewController, toViewController newViewController: UIViewController) {
+        oldViewController.willMove(toParentViewController: nil)
+        self.addChildViewController(newViewController)
+        self.addSubview(subView: newViewController.view, toView: self.container)
+        newViewController.view.alpha = 0
+        newViewController.view.layoutIfNeeded()
+        UIView.animate(withDuration: 0.5, animations: {
+            newViewController.view.alpha = 1
+            oldViewController.view.alpha = 0
+        },
+                                   completion: { finished in
+                                    oldViewController.view.removeFromSuperview()
+                                    oldViewController.removeFromParentViewController()
+                                    newViewController.didMove(toParentViewController: self)
+        })
     }
 
     
+}
+
+extension ViewController: conControllerDelegate {
+    func call() {
+        print("ViewController")
+        let newViewController = self.storyboard?.instantiateViewController(withIdentifier: "GreenVC")
+        newViewController!.view.translatesAutoresizingMaskIntoConstraints = false
+        self.cycleFromViewController(oldViewController: self.currentViewController!, toViewController: newViewController!)
+        self.currentViewController = newViewController
+    }
 }
 
 public extension UIDevice {

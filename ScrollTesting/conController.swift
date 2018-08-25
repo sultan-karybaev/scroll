@@ -8,6 +8,10 @@
 
 import UIKit
 
+protocol conControllerDelegate {
+    func call()
+}
+
 class conController: UIViewController {
 
     @IBOutlet weak var button: UIButton!
@@ -17,6 +21,7 @@ class conController: UIViewController {
     
     @IBOutlet weak var scroll: UIScrollView!
     var views: [String: UIView] = [:]
+    var delegate: conControllerDelegate?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -24,8 +29,6 @@ class conController: UIViewController {
         
         scroll.delegate = self
        
-        
-
         scroll.bounces = false
         
         views["view"] = view
@@ -38,6 +41,7 @@ class conController: UIViewController {
         
         scroll.isPagingEnabled = true
         addConstraints(withViews: views)
+        
     }
 
     func addConstraints(withViews views: [String: UIView]) {
@@ -54,11 +58,16 @@ class conController: UIViewController {
     }
     
     func createView(ind: Int) -> UIViewController {
-        let wallpaper: UIViewController
-        if ind < 3 {
+        //let wallpaper: UIViewController
+        let wallpaper: ScrollController
+        let s: ScrollController
+        if ind < 6 {
             wallpaper = storyboard!.instantiateViewController(withIdentifier: "ScrollController") as! ScrollController
+            s = storyboard!.instantiateViewController(withIdentifier: "ScrollController") as! ScrollController
+            wallpaper.delegate = self
         } else {
-            wallpaper = storyboard!.instantiateViewController(withIdentifier: "ContentController") as! ContentController
+//            wallpaper = storyboard!.instantiateViewController(withIdentifier: "ContentController") as! ContentController
+            wallpaper = storyboard!.instantiateViewController(withIdentifier: "ScrollController") as! ScrollController
         }
         
         //        wallpaper.wallpaperImage = UIImage(named: backgroundImageName)
@@ -90,9 +99,9 @@ class conController: UIViewController {
 
 extension conController: UIScrollViewDelegate {
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        print("scrollViewDidScroll")
-        print(view.frame.width)
-        print(scrollView.contentOffset)
+//        print("scrollViewDidScroll")
+//        print(view.frame.width)
+//        print(scrollView.contentOffset)
         
     }
     
@@ -103,8 +112,14 @@ extension conController: UIScrollViewDelegate {
     func scrollViewWillBeginDecelerating(_ scrollView: UIScrollView) {
         //print("scrollViewWillBeginDecelerating")
     }
-    
-    
+}
+
+extension conController: storyDelegate {
+    func perSegue() {
+        print("segue")
+        self.delegate?.call()
+        //performSegue(withIdentifier: "greenSegue", sender: self)
+    }
 }
 
 

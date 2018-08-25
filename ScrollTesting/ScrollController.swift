@@ -13,6 +13,9 @@ protocol storyDelegate {
 }
 
 class ScrollController: UIViewController {
+    
+    public var delegate: storyDelegate?
+    public var asd = 123
 
     @IBOutlet weak var scroll: UIScrollView!
     
@@ -23,10 +26,18 @@ class ScrollController: UIViewController {
         performSegue(withIdentifier: "secondSegue", sender: self)
     }
     
+    @IBAction func green(_ sender: Any) {
+        print("qwe")
+        delegate?.perSegue()
+        //let sender = storyboard!.instantiateViewController(withIdentifier: "conController") as! conController
+        //performSegue(withIdentifier: "greenSegue", sender: sender)
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         scroll.contentInsetAdjustmentBehavior = .never
         scroll.bounces = false
+        print(scroll.contentSize)
         
 //        scroll.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 100, right: 0)
 //        scroll.setContentOffset(CGPoint(x: 100, y: 200), animated: true)
@@ -42,4 +53,8 @@ class ScrollController: UIViewController {
     @IBAction func back(for unwindSegue: UIStoryboardSegue) {
         
     }
+    
+    
+    
+    
 }
